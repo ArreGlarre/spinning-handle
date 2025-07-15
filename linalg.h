@@ -89,7 +89,8 @@ void vectoradd(float result[3], float vector1[3], float vector2[3])
 float dot(float vector1[3], float vector2[3])
 {
     // returns the dot product of two 3D arrays
-    int i, sum = 0;
+    int i;
+    float sum = 0;
     for (i = 0; i < 3; i++)
     {
         sum += vector1[i] * vector2[i];

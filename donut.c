@@ -14,13 +14,13 @@ SPINNING ASCII DONUT
 
 /*CONSTANTS*/
 int RES = 50;
-float R = 1.5;
-float r = 0.7;
+float R = 2.5;
+float r = 1;
 float N = 200;
 float n = 100;
-float CENTER[3] = {4, 0, 0};
-float LIGHT[3] = {0, 4, 0};      // NEEDS TO BE |CENTER| == 5 !! (L^2 norm)
-char GRADIENT[10] = ".,;:!*#$@"; // 9 characters + \0
+float CENTER[3] = {6, 0, 0};
+float LIGHT[3] = {0, -1, -1};
+char GRADIENT[10] = ".,:;!*#$@"; // 9 characters + \0
 
 /*STRUCTS*/
 struct Pixel
@@ -144,6 +144,12 @@ void draw(struct Surface *torus, struct Pixel *screen)
     float y, z;
     float shadef;
     int shadei;
+    float nlight[3];
+    float light_mag;
+
+    light_mag = (float)sqrt(dot(LIGHT, LIGHT));
+
+    sprod(nlight, LIGHT, (float)1 / light_mag);
 
     for (i = 0; i < n * N; i++)
     {
@@ -160,7 +166,8 @@ void draw(struct Surface *torus, struct Pixel *screen)
             if (dot(torus[i].pos, torus[i].pos) < screen[RES * intz + inty].distance)
             {
                 screen[RES * intz + inty].distance = dot(torus[i].pos, torus[i].pos);
-                shadef = dot(LIGHT, torus[i].n) + 5.1;
+
+                shadef = dot(nlight, torus[i].n) * (float)5 + (float)5;
                 shadei = (int)(shadef >= 8 ? 8 : shadef);
                 screen[RES * intz + inty].shade = GRADIENT[shadei];
             }
@@ -171,7 +178,7 @@ void draw(struct Surface *torus, struct Pixel *screen)
     {
         if (i % RES == 0)
         {
-            printf("\n\t\t\t\t\t\t\t");
+            printf("\n");
         }
         putchar(screen[i].shade);
     }
