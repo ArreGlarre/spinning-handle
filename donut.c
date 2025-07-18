@@ -10,41 +10,30 @@ SPINNING ASCII DONUT
 #include <stdlib.h>
 #include <math.h>
 #include <unistd.h>
-#include "linalg.h"
+#include "ascii_render.h"
 
 /*CONSTANTS*/
 int RES = 50;
-float R = 2.5;
-float r = 1;
-float N = 200;
-float n = 100;
-float CENTER[3] = {6, 0, 0};
+
 float LIGHT[3] = {0, -1, -1};
-char GRADIENT[10] = ".,:;!*#$@"; // 9 characters + \0
-
-/*STRUCTS*/
-struct Pixel
-{
-    char shade;
-    float distance;
-};
-
-struct Surface
-{
-    float pos[3];
-    float n[3];
-};
 
 /*PROTOTYPES*/
-struct Surface *torus(void);
-struct Surface *rotated_torus(struct Surface *torus, float roll, float pitch, float yaw);
-void draw(struct Surface *torus, struct Pixel *screen);
+struct Surface *torus(float R, float r, int N, int n);
+struct Surface *rotated_object(struct Surface *torus, float roll, float pitch, float yaw, int N_tot, float center[3]);
+void draw(struct Surface *torus, struct Pixel *screen, int N_tot);
 
 /*MAIN*/
 int main()
 {
+    float R = 2.5;
+    float r = 1;
+    int N = 200;
+    int n = 100;
+    float center[3] = {6, 0, 0};
+    int N_tot = n * N;
+
     // allocate space for stuff
-    struct Surface *donut = torus();
+    struct Surface *donut = torus(R, r, N, n);
     struct Surface *rotated_donut;
     struct Pixel *screen = (struct Pixel *)malloc(RES * RES * sizeof(struct Pixel));
 
@@ -61,10 +50,10 @@ int main()
             screen[i].distance = 100;
         }
         // rotate
-        rotated_donut = rotated_torus(donut, roll, pitch, yaw);
+        rotated_donut = rotated_object(donut, roll, pitch, yaw, N_tot, center);
 
         // draw
-        draw(rotated_donut, screen);
+        draw(rotated_donut, screen, N_tot);
 
         // update euler angles
         pitch += p_rate;
@@ -79,7 +68,7 @@ int main()
 
 /*FUNCTIONS*/
 
-struct Surface *torus(void)
+struct Surface *torus(float R, float r, int N, int n)
 {
     // returns a pointer to a bunch of Surfaces that make a torus.
     int i, j, k;
@@ -109,19 +98,19 @@ struct Surface *torus(void)
     return p_torus;
 }
 
-struct Surface *rotated_torus(struct Surface *torus, float roll, float pitch, float yaw)
+struct Surface *rotated_object(struct Surface *torus, float roll, float pitch, float yaw, int N_tot, float center[3])
 {
     // Returns a pointer to an identical torus, just rotated (and also add the center vector)
-    struct Surface *rotated_torus = (struct Surface *)malloc(n * N * sizeof(struct Surface));
+    struct Surface *rotated_torus = (struct Surface *)malloc(N_tot * sizeof(struct Surface));
     float matrix[3][3];
     float temp[3];
 
     DCM(matrix, roll, pitch, yaw);
 
-    for (int i = 0; i < n * N; i++)
+    for (int i = 0; i < N_tot; i++)
     {
         matmulvec(temp, matrix, torus[i].pos);
-        vectoradd(rotated_torus[i].pos, temp, CENTER);
+        vectoradd(rotated_torus[i].pos, temp, center);
 
         matmulvec(rotated_torus[i].n, matrix, torus[i].n);
     }
@@ -129,7 +118,7 @@ struct Surface *rotated_torus(struct Surface *torus, float roll, float pitch, fl
     return rotated_torus;
 }
 
-void draw(struct Surface *torus, struct Pixel *screen)
+void draw(struct Surface *torus, struct Pixel *screen, int N_tot)
 {
     /*
     loop over all Surfaces:
@@ -151,7 +140,7 @@ void draw(struct Surface *torus, struct Pixel *screen)
 
     sprod(nlight, LIGHT, (float)1 / light_mag);
 
-    for (i = 0; i < n * N; i++)
+    for (i = 0; i < N_tot; i++)
     {
 
         y = torus[i].pos[1] / torus[i].pos[0];
