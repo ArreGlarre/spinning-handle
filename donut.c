@@ -13,14 +13,9 @@ SPINNING ASCII DONUT
 #include "ascii_render.h"
 
 /*CONSTANTS*/
-int RES = 50;
-
-float LIGHT[3] = {0, -1, -1};
 
 /*PROTOTYPES*/
 struct Surface *torus(float R, float r, int N, int n);
-struct Surface *rotated_object(struct Surface *torus, float roll, float pitch, float yaw, int N_tot, float center[3]);
-void draw(struct Surface *torus, struct Pixel *screen, int N_tot);
 
 /*MAIN*/
 int main()
@@ -50,7 +45,7 @@ int main()
             screen[i].distance = 100;
         }
         // rotate
-        rotated_donut = rotated_object(donut, roll, pitch, yaw, N_tot, center);
+        rotated_donut = rotated_model(donut, roll, pitch, yaw, N_tot, center);
 
         // draw
         draw(rotated_donut, screen, N_tot);
@@ -96,79 +91,4 @@ struct Surface *torus(float R, float r, int N, int n)
     }
 
     return p_torus;
-}
-
-struct Surface *rotated_object(struct Surface *torus, float roll, float pitch, float yaw, int N_tot, float center[3])
-{
-    // Returns a pointer to an identical torus, just rotated (and also add the center vector)
-    struct Surface *rotated_torus = (struct Surface *)malloc(N_tot * sizeof(struct Surface));
-    float matrix[3][3];
-    float temp[3];
-
-    DCM(matrix, roll, pitch, yaw);
-
-    for (int i = 0; i < N_tot; i++)
-    {
-        matmulvec(temp, matrix, torus[i].pos);
-        vectoradd(rotated_torus[i].pos, temp, center);
-
-        matmulvec(rotated_torus[i].n, matrix, torus[i].n);
-    }
-
-    return rotated_torus;
-}
-
-void draw(struct Surface *torus, struct Pixel *screen, int N_tot)
-{
-    /*
-    loop over all Surfaces:
-    * project to screen coordinates.
-    * check if its inside bounds.
-    * check if it has been drawn there (closer or at all)
-    * compute shade
-    * set shade and new distance value
-    */
-
-    int i, inty, intz;
-    float y, z;
-    float shadef;
-    int shadei;
-    float nlight[3];
-    float light_mag;
-
-    light_mag = (float)sqrt(dot(LIGHT, LIGHT));
-
-    sprod(nlight, LIGHT, (float)1 / light_mag);
-
-    for (i = 0; i < N_tot; i++)
-    {
-
-        y = torus[i].pos[1] / torus[i].pos[0];
-        z = torus[i].pos[2] / torus[i].pos[0];
-
-        inty = (int)rintf((y + 1) * RES / 2);
-        intz = (int)rintf((z + 1) * RES / 2);
-
-        if (inty >= 0 && inty < RES && intz >= 0 && intz < RES)
-        {
-            // set distance and shade
-            if (dot(torus[i].pos, torus[i].pos) < screen[RES * intz + inty].distance)
-            {
-                screen[RES * intz + inty].distance = dot(torus[i].pos, torus[i].pos);
-
-                shadef = dot(nlight, torus[i].n) * (float)5 + (float)5;
-                shadei = (int)(shadef >= 8 ? 8 : shadef);
-                screen[RES * intz + inty].shade = GRADIENT[shadei];
-            }
-        }
-    }
-
-    for (i = 0; i < RES * RES; i++)
-    {
-        if (i % RES == 0)
-        {
-            printf("\n");
-        }
-        putchar(screen[i].shade);
-    }
 }
