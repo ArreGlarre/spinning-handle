@@ -10,7 +10,6 @@ to render a 3d object to the terminal using ascii characters.
 #include <time.h>
 #include <stdlib.h>
 #include <math.h>
-#include <unistd.h>
 #include "linalg.h"
 
 // STRUCTS
@@ -33,9 +32,10 @@ struct Surface *rotated_model(struct Surface *model, float roll, float pitch, fl
 void draw(struct Surface *model, struct Pixel *screen, int N_tot);
 
 // CONSTANTS
-char GRADIENT[10] = ".,:;!*#$@"; // 9 characters + \0
+char GRADIENT[10] = ".,:;!*#$@"; // 9 characters + \0. Will not work otherwise.
 float LIGHT[3] = {0, -1, -1};
-int RES = 50;
+int ZRES = 40;
+int YRES = 80;
 
 // FUNCTIONS
 
@@ -88,26 +88,26 @@ void draw(struct Surface *model, struct Pixel *screen, int N_tot)
         y = model[i].pos[1] / model[i].pos[0];
         z = model[i].pos[2] / model[i].pos[0];
 
-        inty = (int)rintf((y + 1) * RES / 2);
-        intz = (int)rintf((z + 1) * RES / 2);
+        inty = (int)rintf((y + 1) * YRES / 2);
+        intz = (int)rintf((z + 1) * ZRES / 2);
 
-        if (inty >= 0 && inty < RES && intz >= 0 && intz < RES)
+        if (inty >= 0 && inty < YRES && intz >= 0 && intz < ZRES)
         {
             // set distance and shade
-            if (dot(model[i].pos, model[i].pos) < screen[RES * intz + inty].distance)
+            if (dot(model[i].pos, model[i].pos) < screen[YRES * intz + inty].distance)
             {
-                screen[RES * intz + inty].distance = dot(model[i].pos, model[i].pos);
+                screen[YRES * intz + inty].distance = dot(model[i].pos, model[i].pos);
 
                 shadef = dot(nlight, model[i].n) * (float)5 + (float)5;
                 shadei = (int)(shadef >= 8 ? 8 : shadef);
-                screen[RES * intz + inty].shade = GRADIENT[shadei];
+                screen[YRES * intz + inty].shade = GRADIENT[shadei];
             }
         }
     }
 
-    for (i = 0; i < RES * RES; i++)
+    for (i = 0; i < YRES * ZRES; i++)
     {
-        if (i % RES == 0)
+        if (i % YRES == 0)
         {
             printf("\n");
         }

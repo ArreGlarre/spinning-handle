@@ -1,6 +1,10 @@
 /*
 SPINNING ASCII DONUT
 
+This file demonstrates a spinning 3D donut rendered with ASCII symbols.
+It was used to test the 3D renderer without having implemented
+any euler kinematics and dynamics.
+
 */
 
 /*INCLUDE STATEMENTS*/
@@ -11,8 +15,6 @@ SPINNING ASCII DONUT
 #include <math.h>
 #include <unistd.h>
 #include "ascii_render.h"
-
-/*CONSTANTS*/
 
 /*PROTOTYPES*/
 struct Surface *torus(float R, float r, int N, int n);
@@ -30,7 +32,7 @@ int main()
     // allocate space for stuff
     struct Surface *donut = torus(R, r, N, n);
     struct Surface *rotated_donut;
-    struct Pixel *screen = (struct Pixel *)malloc(RES * RES * sizeof(struct Pixel));
+    struct Pixel *screen = (struct Pixel *)malloc(ZRES * YRES * sizeof(struct Pixel));
 
     // Motion parameters
     float pitch = 0, roll = 0, yaw = 0;
@@ -39,7 +41,7 @@ int main()
     while (1)
     {
         // clear screen
-        for (int i = 0; i < RES * RES; i++)
+        for (int i = 0; i < ZRES * YRES; i++)
         {
             screen[i].shade = ' ';
             screen[i].distance = 100;
