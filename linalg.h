@@ -13,6 +13,7 @@ This file contains a couple usefull functions for linear algebra.
         full DCM
     }
 * dot product
+* cross product
 * vector scalar product
 
 */
@@ -31,6 +32,8 @@ void matmulmat(float result[3][3], float mat1[3][3], float mat2[3][3]);
 void matmulvec(float result[3], float mat[3][3], float vector[3]);
 void vectoradd(float result[3], float vector1[3], float vector2[3]);
 float dot(float vector1[3], float vector2[3]);
+void sprod(float result[3], float vector[3], float scalar);
+void cprod(float result[3], float vector1[3], float vector2[3]);
 void x_rotation(float result[3][3], float theta);
 void y_rotation(float result[3][3], float theta);
 void z_rotation(float result[3][3], float theta);
@@ -106,6 +109,11 @@ void sprod(float result[3], float vector[3], float scalar)
     {
         result[i] = vector[i] * scalar;
     }
+}
+
+void cprod(float result[3], float vector1[3], float vector2[3])
+{
+    // Computes the cross product vector1 x vector 2 and stores in result
 }
 
 void x_rotation(float result[3][3], float theta)
