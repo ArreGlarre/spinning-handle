@@ -1,3 +1,5 @@
 # Ignore a.out
-.a.out
+a.out
+
+# ignore .vscode folder 
 .vscode/
