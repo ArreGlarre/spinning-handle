@@ -1,0 +1,3 @@
+# Ignore a.out
+.a.out
+.vscode/
